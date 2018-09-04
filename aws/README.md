@@ -141,7 +141,7 @@ Supported languages
 - Python
 
 ```mermaid
-graph LR
+graph TD
     APIGATEWAY[API Gateway]
     DYNAMODBSTREAMS[DynamoDB Streams]
     ETC[...]
@@ -367,7 +367,7 @@ A monitoring and management service.
 - Analyze
 
 ```mermaid
-graph LR
+graph TD
     CW[CloudWatch]
 
     Kinesis-->CW
