@@ -1,0 +1,106 @@
+@startuml
+
+actor User
+participant "Front Cockpit" as CF
+participant "Back Cockpit" as CB
+participant "API CONTENT" as API
+database "DB" as DB
+
+User -> CF: Load Home
+CF -> CB: Authentication Request\nPOST /api/generateToken
+activate CF
+CB -> CF: Authentication Response\nJWT Token
+deactivate CF
+
+User -> CF: Choose one repository
+
+== FETCH SKILLS ==
+
+User -> CF: Choose one content
+    CF -> API: Fetch skill on content\nGET /api/v2/repository/{repository}/skills?ref=
+    activate CF
+
+        API -> API: Access to repository Middleware
+        note right
+          JWT Token is verified. We recover  
+          //connectUser, repository, branch//
+          params and set them on request
+        end note
+
+        API -> DB: find({refs, repository})
+        DB -> API: SKILL LIST
+
+        API -> API: formatSkill
+        note right
+          For each skill in SKILL_LIST, we verify if there are
+          custom locales for the given repository and we send
+          then with global values
+        end note
+
+    API -> CF: Skills with Locales in Cockpit format
+    deactivate CF
+
+== SEARCH SKILL ==
+
+User -> CF: Fill a skill name
+    CF -> API: GET /api/v2/repository/{repository}/skills?filter=
+        activate CF
+        API -> API: Access to repository Middleware
+        API -> DB: find({regex: filter, repository})
+        DB -> API: SKILL LIST
+        API -> API: formatSkill
+
+    API -> CF: Skills with Locales in Cockpit format
+    deactivate CF
+
+== UPDATE SKILL ==
+
+User -> CF: Modify data for a existing skill
+    CF -> API: PUT /api/v2/repository/{repository}/skills/{ref}
+        activate CF
+
+        API -> API: Access to repository Middleware
+        API -> DB: find({refs, repository})
+        DB -> API: SKILL
+
+        group updateSkill
+            alt SKILL is empty
+                API -> CF: 404
+            else SKILL.repository !== url repository
+                API -> CF: 403
+            else
+                alt content user
+                    API -> API: build new global locales
+                else Non content user
+                     API -> API: build new custom locales
+                end
+                API -> DB: update
+                DB -> API: updatedSkill
+                API -> API: formatSkill(updatedSkill)
+                API -> CF: 200: Skill updated
+                deactivate CF
+            end
+        end
+
+== CREATE SKILL ==
+
+User -> CF: Fill data for a new skill
+    CF -> API: POST /api/v2/repository/{repository}/skills
+        activate CF
+        API -> API: Access to repository Middleware
+
+        group createSkill
+            alt content user
+                API -> API: build Coorpacademy Skill
+            else Non content user
+                API -> API: build Custom Skill
+            end
+            API -> DB: insert
+            DB -> API: newSkill
+            API -> API: formatSkill(updatedSkill)
+
+        end
+    API -> CF: 201: New Skill
+    deactivate CF
+
+@enduml

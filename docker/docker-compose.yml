@@ -1,0 +1,16 @@
+version: '2'
+services:
+  webserver:
+    build:
+      context: ./webserver
+      dockerfile: Arg.Dockerfile
+
+  proxy:
+    build:
+      context: ./proxy
+    environment:
+      PROXY_URL: http://webserver:3000
+    depends_on:
+      - webserver
+    ports:
+      - 3000:3000

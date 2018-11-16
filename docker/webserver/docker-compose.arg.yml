@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  start:
+    build:
+      dockerfile: Arg.Dockerfile
+      args:
+        NODE_ENV: production
+    ports:
+      - 3000:3000
+
+  test:
+    build:
+      dockerfile: Arg.Dockerfile
+      args:
+        NODE_ENV: test

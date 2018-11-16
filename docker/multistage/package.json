@@ -1,0 +1,14 @@
+{
+  "name": "multistage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "markserv src -p 3000 -a 0.0.0.0 -l false -b false"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "markserv": "^1.15.0"
+  }
+}
